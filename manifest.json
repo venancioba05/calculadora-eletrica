@@ -1,0 +1,15 @@
+{
+  "name": "Calculadora Elétrica NBR 5410",
+  "short_name": "Calc Elétrica",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#004080",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2800/2800936.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
