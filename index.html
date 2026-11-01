@@ -3,50 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Elétrica</title>
+    <title>Calculadora Elétrica - NBR 5410</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h2>Calculadora Elétrica</h2>
+    <h2>Calculadora Elétrica NBR 5410</h2>
     
     <div class="form-group">
-        <label for="potencia">Potência (Watts):</label>
-        <input type="number" id="potencia" placeholder="Ex: 5000">
+        <label for="potencia">Potência do Equipamento / Circuitos (Watts):</label>
+        <input type="number" id="potencia" placeholder="Ex: 5500 (Chuveiro)">
     </div>
 
     <div class="form-group">
-        <label for="tensao">Tensão (Volts):</label>
+        <label for="tensao">Tensão da Rede (Volts):</label>
         <select id="tensao">
-            <option value="127">127V</option>
-            <option value="220" selected>220V</option>
+            <option value="127">127 V</option>
+            <option value="220" selected>220 V</option>
         </select>
     </div>
 
-    <button onclick="calcular()">Calcular Corrente</button>
+    <div class="form-group">
+        <label for="fatorPoder">Fator de Potência (cos φ):</label>
+        <input type="number" id="fatorPoder" value="1.0" step="0.05" min="0.1" max="1.0">
+    </div>
+
+    <button onclick="calcularDimensionamento()">Calcular e Dimensionar</button>
 
     <div id="resultadoBox" class="result">
-        <h3>Resultado:</h3>
+        <h3>Resultado do Dimensionamento:</h3>
         <p id="textoResultado"></p>
     </div>
 </div>
 
 <script>
-    function calcular() {
+    function calcularDimensionamento() {
         const potencia = parseFloat(document.getElementById('potencia').value);
         const tensao = parseFloat(document.getElementById('tensao').value);
+        const fp = parseFloat(document.getElementById('fatorPoder').value) || 1.0;
+        
         const box = document.getElementById('resultadoBox');
         const texto = document.getElementById('textoResultado');
 
         if (!potencia || potencia <= 0) {
-            alert('Por favor, insira uma potência válida.');
+            alert('Por favor, informe uma potência válida.');
             return;
         }
 
-        const corrente = potencia / tensao;
+        // Corrente de projeto (Ib = P / (V * cos φ))
+        const corrente = potencia / (tensao * fp);
 
-        texto.innerHTML = `Corrente estimada: <strong>${corrente.toFixed(2)} A</strong><br>Baseado na tensão de ${tensao}V.`;
+        // Tabela simplificada de capacidade de condução de corrente (Método B1 - PVC 70°C)
+        // Bitolas comerciais: 1.5, 2.5, 4.0, 6.0, 10.0, 16.0, 25.0, 35.0 mm²
+        const tabelacapacidade = [
+            { bitola: 1.5, iMax: 17.5 },
+            { bitola: 2.5, iMax: 24.0 },
+            { bitola: 4.0, iMax: 32.0 },
+            { bitola: 6.0, iMax: 41.0 },
+            { bitola: 10.0, iMax: 57.0 },
+            { bitola: 16.0, iMax: 76.0 },
+            { bitola: 25.0, iMax: 101.0 },
+            { bitola: 35.0, iMax: 125.0 }
+        ];
+
+        // Disjuntores padrão comercial DIN (In)
+        const disjuntoresComerciais = [6, 10, 16, 20, 25, 32, 40, 50, 63, 70, 80, 100, 125];
+
+        // Determinar bitola do condutor
+        let caboRecomendado = tabelacapacidade.find(item => item.iMax >= corrente);
+        
+        // Determinar disjuntor recomendado (Ib <= In <= Iz)
+        let disjuntorRecomendado = disjuntoresComerciais.find(d => d >= corrente);
+
+        if (!caboRecomendado || !disjuntorRecomendado) {
+            texto.innerHTML = `<strong>Atenção:</strong> A corrente calculada de <strong>${corrente.toFixed(2)} A</strong> excede a faixa de cálculo rápido residencial/comercial padrão.`;
+        } else {
+            texto.innerHTML = `
+                • <strong>Corrente de Projeto (Ib):</strong> ${corrente.toFixed(2)} A<br>
+                • <strong>Seção do Condutor (Cabo):</strong> ${caboRecomendado.bitola} mm² (Suporta até ${caboRecomendado.iMax} A)<br>
+                • <strong>Disjuntor Sugerido (In):</strong> ${disjuntorRecomendado} A
+            `;
+        }
+
         box.style.display = 'block';
     }
 </script>
