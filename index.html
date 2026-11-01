@@ -7,88 +7,47 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div class="container">
-    <h2>Calculadora Elétrica NBR 5410</h2>
-    
-    <div class="form-group">
-        <label for="potencia">Potência do Equipamento / Circuitos (Watts):</label>
-        <input type="number" id="potencia" placeholder="Ex: 5500 (Chuveiro)">
-    </div>
-
-    <div class="form-group">
-        <label for="tensao">Tensão da Rede (Volts):</label>
-        <select id="tensao">
-            <option value="127">127 V</option>
-            <option value="220" selected>220 V</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="fatorPoder">Fator de Potência (cos φ):</label>
-        <input type="number" id="fatorPoder" value="1.0" step="0.05" min="0.1" max="1.0">
-    </div>
-
-    <button onclick="calcularDimensionamento()">Calcular e Dimensionar</button>
-
-    <div id="resultadoBox" class="result">
-        <h3>Resultado do Dimensionamento:</h3>
-        <p id="textoResultado"></p>
-    </div>
-</div>
-
-<script>
-    function calcularDimensionamento() {
-        const potencia = parseFloat(document.getElementById('potencia').value);
-        const tensao = parseFloat(document.getElementById('tensao').value);
-        const fp = parseFloat(document.getElementById('fatorPoder').value) || 1.0;
+    <div class="container">
+        <h2>Calculadora Elétrica - Divisão por Cômodos e TUEs</h2>
         
-        const box = document.getElementById('resultadoBox');
-        const texto = document.getElementById('textoResultado');
+        <div class="form-group">
+            <label for="tipoRede">Padrão de Entrada / Tensão (Bahia):</label>
+            <select id="tipoRede">
+                <option value="mono220">Monofásico - 220 V (F+N)</option>
+                <option value="bi220">Bifásico - 220 V (F+F)</option>
+                <option value="bi380">Bifásico - 380 V (F+F)</option>
+                <option value="tri380" selected>Trifásico - 380 V / 220 V</option>
+                <option value="mono127">Monofásico - 127 V (F+N)</option>
+            </select>
+        </div>
 
-        if (!potencia || potencia <= 0) {
-            alert('Por favor, informe uma potência válida.');
-            return;
-        }
+        <div class="form-group">
+            <label for="fatorDemanda">Fator de Demanda Geral (0.1 a 1.0):</label>
+            <input type="number" id="fatorDemanda" value="0.70" step="0.05" min="0.1" max="1.0">
+        </div>
 
-        // Corrente de projeto (Ib = P / (V * cos φ))
-        const corrente = potencia / (tensao * fp);
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
 
-        // Tabela simplificada de capacidade de condução de corrente (Método B1 - PVC 70°C)
-        // Bitolas comerciais: 1.5, 2.5, 4.0, 6.0, 10.0, 16.0, 25.0, 35.0 mm²
-        const tabelacapacidade = [
-            { bitola: 1.5, iMax: 17.5 },
-            { bitola: 2.5, iMax: 24.0 },
-            { bitola: 4.0, iMax: 32.0 },
-            { bitola: 6.0, iMax: 41.0 },
-            { bitola: 10.0, iMax: 57.0 },
-            { bitola: 16.0, iMax: 76.0 },
-            { bitola: 25.0, iMax: 101.0 },
-            { bitola: 35.0, iMax: 125.0 }
-        ];
+        <h3>Cômodos e Áreas da Instalação</h3>
+        <div id="listaComodos">
+            <!-- Inserido dinamicamente via JS -->
+        </div>
 
-        // Disjuntores padrão comercial DIN (In)
-        const disjuntoresComerciais = [6, 10, 16, 20, 25, 32, 40, 50, 63, 70, 80, 100, 125];
+        <button onclick="adicionarComodo()" style="background-color: #28a745; margin-bottom: 15px;">
+            + Adicionar Cômodo / Ambiente
+        </button>
 
-        // Determinar bitola do condutor
-        let caboRecomendado = tabelacapacidade.find(item => item.iMax >= corrente);
-        
-        // Determinar disjuntor recomendado (Ib <= In <= Iz)
-        let disjuntorRecomendado = disjuntoresComerciais.find(d => d >= corrente);
+        <button onclick="calcularQuadroCompleto()">Calcular Projeto Completo</button>
 
-        if (!caboRecomendado || !disjuntorRecomendado) {
-            texto.innerHTML = `<strong>Atenção:</strong> A corrente calculada de <strong>${corrente.toFixed(2)} A</strong> excede a faixa de cálculo rápido residencial/comercial padrão.`;
-        } else {
-            texto.innerHTML = `
-                • <strong>Corrente de Projeto (Ib):</strong> ${corrente.toFixed(2)} A<br>
-                • <strong>Seção do Condutor (Cabo):</strong> ${caboRecomendado.bitola} mm² (Suporta até ${caboRecomendado.iMax} A)<br>
-                • <strong>Disjuntor Sugerido (In):</strong> ${disjuntorRecomendado} A
-            `;
-        }
+        <div id="resultadoBox" class="result">
+            <h3>Relatório Geral do Projeto:</h3>
+            <div id="textoResultado"></div>
+            <button id="btnCopiar" onclick="copiarRelatorio()" style="background-color: #25D366; margin-top: 15px;">
+                Copiar Relatório Completo para WhatsApp
+            </button>
+        </div>
+    </div>
 
-        box.style.display = 'block';
-    }
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
