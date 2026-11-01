@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Elétrica - NBR 5410</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #004085;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-left: 5px solid #0056b3;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calculadora Elétrica</h2>
+    
+    <div class="form-group">
+        <label for="potencia">Potência (Watts):</label>
+        <input type="number" id="potencia" placeholder="Ex: 5000">
+    </div>
+
+    <div class="form-group">
+        <label for="tensao">Tensão (Volts):</label>
+        <select id="tensao">
+            <option value="127">127V</option>
+            <option value="220">220V</option>
+        </select>
+    </div>
+
+    <button onclick="calcular()">Calcular Corrente</button>
+
+    <div id="resultadoBox" class="result">
+        <h3>Resultado:</h3>
+        <p id="textoResultado"></p>
+    </div>
+</div>
+
+<script>
+    function calcular() {
+        const potencia = parseFloat(document.getElementById('potencia').value);
+        const tensao = parseFloat(document.getElementById('tensao').value);
+        const box = document.getElementById('resultadoBox');
+        const texto = document.getElementById('textoResultado');
+
+        if (!potencia || potencia <= 0) {
+            alert('Por favor, insira uma potência válida.');
+            return;
+        }
+
+        // Cálculo básico da corrente (I = P / V)
+        const corrente = potencia / tensao;
+
+        texto.innerHTML = `Corrente estimada: <strong>${corrente.toFixed(2)} A</strong><br>Baseado na tensão de ${tensao}V.`;
+        box.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
